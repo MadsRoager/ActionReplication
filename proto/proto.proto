@@ -18,6 +18,7 @@ message BidRequest
 {
   int32 amount = 1;
   string name = 2;
+  int32 processID = 3;
 }
 
 message Ack
