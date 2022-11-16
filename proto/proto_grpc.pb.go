@@ -141,6 +141,7 @@ var Frontend_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServerClient interface {
 	UpdateHighestBid(ctx context.Context, in *BidRequest, opts ...grpc.CallOption) (*Ack, error)
+	GetHighestBid(ctx context.Context, in *Void, opts ...grpc.CallOption) (*BidResult, error)
 }
 
 type serverClient struct {
@@ -153,7 +154,16 @@ func NewServerClient(cc grpc.ClientConnInterface) ServerClient {
 
 func (c *serverClient) UpdateHighestBid(ctx context.Context, in *BidRequest, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/proto.Server/updateHighestBid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Server/UpdateHighestBid", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serverClient) GetHighestBid(ctx context.Context, in *Void, opts ...grpc.CallOption) (*BidResult, error) {
+	out := new(BidResult)
+	err := c.cc.Invoke(ctx, "/proto.Server/GetHighestBid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -165,6 +175,7 @@ func (c *serverClient) UpdateHighestBid(ctx context.Context, in *BidRequest, opt
 // for forward compatibility
 type ServerServer interface {
 	UpdateHighestBid(context.Context, *BidRequest) (*Ack, error)
+	GetHighestBid(context.Context, *Void) (*BidResult, error)
 	mustEmbedUnimplementedServerServer()
 }
 
@@ -174,6 +185,9 @@ type UnimplementedServerServer struct {
 
 func (UnimplementedServerServer) UpdateHighestBid(context.Context, *BidRequest) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateHighestBid not implemented")
+}
+func (UnimplementedServerServer) GetHighestBid(context.Context, *Void) (*BidResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHighestBid not implemented")
 }
 func (UnimplementedServerServer) mustEmbedUnimplementedServerServer() {}
 
@@ -198,10 +212,28 @@ func _Server_UpdateHighestBid_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.Server/updateHighestBid",
+		FullMethod: "/proto.Server/UpdateHighestBid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ServerServer).UpdateHighestBid(ctx, req.(*BidRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Server_GetHighestBid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Void)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServerServer).GetHighestBid(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.Server/GetHighestBid",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServerServer).GetHighestBid(ctx, req.(*Void))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,8 +246,12 @@ var Server_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "updateHighestBid",
+			MethodName: "UpdateHighestBid",
 			Handler:    _Server_UpdateHighestBid_Handler,
+		},
+		{
+			MethodName: "GetHighestBid",
+			Handler:    _Server_GetHighestBid_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

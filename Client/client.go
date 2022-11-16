@@ -1,10 +1,9 @@
 package main
 
 import (
-	"AuctionReplication/proto"
 	"bufio"
+	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -32,6 +31,8 @@ func main() {
 		id: 	*id,
 	}
 
+	
+
 	go startClient(client)
 
 	for {
@@ -47,30 +48,44 @@ func startClient(client *Client) {
 
 }
 
-func getServerConnection(client *Client) proto.MessagingServiceClient {
+func getServerConnection(client *Client) proto.FrontendClient {
 	conn, err := grpc.Dial(":"+strconv.Itoa(*frontendPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalln("Could not dial server")
 	}
-	return proto.NewMessagingServiceClient(conn)
+	return proto.NewFrontendClient(conn)
 }
 
 func sendMessage(serverConnection proto.FrontendClient) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		input := scanner.Text()
 		if strings.HasPrefix(input, "bid") {
 			split := strings.Split(input, " ")
-			ans, err := serverConnection.Bid(&proto.BidRequest{
-				Amount: split[1],
-				Name: name,
-				ProcessID: id,
+			amount, _ := strconv.ParseInt(split[1], 10, 32)
+			
+			ans, err := serverConnection.Bid(ctx, &proto.BidRequest{
+				Amount: int32(amount),
+				Name: *name,
+				ProcessID: int32(*id),
 			})
-
+			if err != nil {
+				log.Println(ans.Ack)
+			} else {
+				log.Fatal("some error occured")
+			}
+			
 		} 
 		if input == "result" {
-			ans, err := serverConnection.Result(&proto.Void{})
-			log.Println(ans.Amount)
-		} 
+			ans, err := serverConnection.Result(ctx, &proto.Void{})
+			if err != nil {
+				log.Println("Auction status is " + ans.AuctionStatus + ", the highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
+			} else {
+				log.Fatal("some error occured")
+			}
+		}
 	}
 }

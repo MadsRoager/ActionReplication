@@ -9,7 +9,8 @@ service Frontend
 }
 
 service Server {
-  rpc updateHighestBid (BidRequest) returns (Ack);
+  rpc UpdateHighestBid (BidRequest) returns (Ack);
+  rpc GetHighestBid (Void) returns (BidResult);
 }
 
 message Void {}
