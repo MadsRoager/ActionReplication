@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = "github.com/MadsRoager/AuctionReplication/proto";
+package proto;
+
+service Frontend
+{
+  rpc Bid (BidRequest) returns (Ack);
+  rpc Result (Void) returns (BidRequest);
+}
+
+service Server {
+  rpc updateHighestBid (BidRequest) returns (Ack);
+}
+
+message Void {}
+
+message BidRequest
+{
+  int32 amount = 1;
+  string name = 2;
+}
+
+message Ack
+{
+  int32 ack = 1;
+}
