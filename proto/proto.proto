@@ -5,7 +5,7 @@ package proto;
 service Frontend
 {
   rpc Bid (BidRequest) returns (Ack);
-  rpc Result (Void) returns (BidRequest);
+  rpc Result (Void) returns (BidResult);
 }
 
 service Server {
@@ -16,9 +16,16 @@ message Void {}
 
 message BidRequest
 {
-  int32 amount = 1;
-  string name = 2;
-  int32 processID = 3;
+  int32   amount = 1;
+  string  name = 2;
+  int32   processID = 3;
+}
+
+message BidResult
+{
+  int32   amount = 1;
+  string  name = 2;
+  string  auctionStatus = 3;
 }
 
 message Ack
