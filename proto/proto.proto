@@ -30,5 +30,5 @@ message BidResult
 
 message Ack
 {
-  int32 ack = 1;
+  string ack = 1;
 }
