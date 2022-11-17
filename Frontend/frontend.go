@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
@@ -26,9 +27,10 @@ func main() {
 		serverNodePorts:  make([]int32, 4),
 		serverConnection: getServerConnection(),
 	}
-	startFrontEnd(frontend)
+	go startFrontEnd(frontend)
 
 	for {
+		fmt.Println("frontend started")
 		time.Sleep(100 * time.Second)
 	}
 }

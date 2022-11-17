@@ -1,6 +1,7 @@
 package main
 
 import (
+	context "context"
 	"flag"
 	"github.com/MadsRoager/AuctionReplication/proto"
 	"google.golang.org/grpc"
@@ -25,7 +26,7 @@ var mutex = sync.Mutex{}
 var nodePort = flag.Int("port", 8081, "server port number")
 
 func main() {
-	setupNode()
+	go setupNode()
 	defer runAuction()
 }
 
@@ -67,15 +68,15 @@ func endAuction() {
 	isAuctionOver = true
 }
 
-func (node *Node) evaluateNewBid(bid *proto.BidRequest) proto.Ack {
+func (node *Node) UpdateHighestBid(ctx context.Context, bid *proto.BidRequest) (*proto.Ack, error) {
 	if isAuctionOver {
-		return fail()
+		return fail(), nil
 	}
 	if isWinningBet(bid) {
 		updateHighestBid(bid)
-		return success()
+		return success(), nil
 	}
-	return fail()
+	return fail(), nil
 }
 
 func isWinningBet(bid *proto.BidRequest) bool {
@@ -95,13 +96,13 @@ func updateHighestBid(bid *proto.BidRequest) {
 	mutex.Unlock()
 }
 
-func (node *Node) result() *proto.BidResult {
+func (node *Node) GetHighestBid(ctx context.Context, in *proto.Void) (*proto.BidResult, error) {
 	result := &proto.BidResult{
 		Amount:        highestBid,
 		Name:          highestBidder,
 		AuctionStatus: getAuctionStatus(),
 	}
-	return result
+	return result, nil
 }
 
 func getAuctionStatus() string {
@@ -111,14 +112,14 @@ func getAuctionStatus() string {
 	return "Auction is ongoing."
 }
 
-func success() proto.Ack {
-	return proto.Ack{
+func success() *proto.Ack {
+	return &proto.Ack{
 		Ack: "Success",
 	}
 }
 
-func fail() proto.Ack {
-	return proto.Ack{
+func fail() *proto.Ack {
+	return &proto.Ack{
 		Ack: "Fail",
 	}
 }
