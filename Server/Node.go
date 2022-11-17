@@ -2,36 +2,74 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/MadsRoager/AuctionReplication/proto"
+	"google.golang.org/grpc"
+	"log"
+	"net"
+	"strconv"
 	"sync"
 	"time"
 )
 
+type Node struct {
+	proto.UnimplementedServerServer
+	serverNodePorts []int32
+}
+
 var highestBid int32 = 0
-var highestBidder string = "No bidder yet"
+var highestBidder = "No bidder yet"
 var highestBidderID int32 = 0
+var isAuctionOver = false
 
 var mutex = sync.Mutex{}
-var port = flag.Int("port", 8080, "server port number")
+var nodePort = flag.Int("port", 8080, "server port number")
 
 func main() {
-	flag.Parse()
+	setupNode()
 	defer runAuction()
 }
 
-var counter = 0
+func setupNode() {
+	flag.Parse()
+	node := &Node{
+		serverNodePorts: make([]int32, 4),
+	}
+	grpcServer := grpc.NewServer()
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(*nodePort))
+	if err != nil {
+		log.Fatalln("could not start listener")
+	}
+	proto.RegisterServerServer(grpcServer, node)
+	serverError := grpcServer.Serve(listener)
+	if serverError != nil {
+		log.Fatalln("could not start server")
+	}
+}
 
 func runAuction() {
 	for {
-		time.Sleep(time.Second)
-		fmt.Println(counter)
-		counter++
+		startNewAuction()
+		time.Sleep(time.Second * 20)
+		endAuction()
+		time.Sleep(time.Second * 5)
 	}
-
 }
 
-func evaluateNewBid(bid *proto.BidRequest) proto.Ack {
+func startNewAuction() {
+	highestBid = 0
+	highestBidder = "No bidder yet"
+	highestBidderID = 0
+	isAuctionOver = false
+}
+
+func endAuction() {
+	isAuctionOver = true
+}
+
+func (node *Node) evaluateNewBid(bid *proto.BidRequest) proto.Ack {
+	if isAuctionOver {
+		return fail()
+	}
 	if isWinningBet(bid) {
 		updateHighestBid(bid)
 		return success()
@@ -56,13 +94,20 @@ func updateHighestBid(bid *proto.BidRequest) {
 	mutex.Unlock()
 }
 
-func result() *proto.BidResult {
+func (node *Node) result() *proto.BidResult {
 	result := &proto.BidResult{
 		Amount:        highestBid,
 		Name:          highestBidder,
-		AuctionStatus: "Ongoing",
+		AuctionStatus: getAuctionStatus(),
 	}
 	return result
+}
+
+func getAuctionStatus() string {
+	if isAuctionOver {
+		return "Auction has ended."
+	}
+	return "Auction is ongoing."
 }
 
 func success() proto.Ack {
