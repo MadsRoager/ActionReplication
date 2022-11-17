@@ -25,27 +25,19 @@ var id = flag.Int("id", 0, "id")
 var frontendPort = flag.Int("frontendPort", 8000, "frontend port")
 
 func main() {
-
 	client := &Client{
-		name: 	*name,
-		id: 	*id,
+		name: *name,
+		id:   *id,
 	}
-
-	
-
 	go startClient(client)
-
 	for {
 		time.Sleep(100 * time.Second)
 	}
 }
 
 func startClient(client *Client) {
-
 	serverConnection := getServerConnection(client)
-
-	sendMessage(serverConnection)	
-
+	sendMessage(serverConnection)
 }
 
 func getServerConnection(client *Client) proto.FrontendClient {
@@ -66,10 +58,10 @@ func sendMessage(serverConnection proto.FrontendClient) {
 		if strings.HasPrefix(input, "bid") {
 			split := strings.Split(input, " ")
 			amount, _ := strconv.ParseInt(split[1], 10, 32)
-			
+
 			ans, err := serverConnection.Bid(ctx, &proto.BidRequest{
-				Amount: int32(amount),
-				Name: *name,
+				Amount:    int32(amount),
+				Name:      *name,
 				ProcessID: int32(*id),
 			})
 			if err != nil {
@@ -77,8 +69,8 @@ func sendMessage(serverConnection proto.FrontendClient) {
 			} else {
 				log.Fatal("some error occured")
 			}
-			
-		} 
+
+		}
 		if input == "result" {
 			ans, err := serverConnection.Result(ctx, &proto.Void{})
 			if err != nil {

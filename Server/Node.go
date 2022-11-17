@@ -22,7 +22,7 @@ var highestBidderID int32 = 0
 var isAuctionOver = false
 
 var mutex = sync.Mutex{}
-var nodePort = flag.Int("port", 8080, "server port number")
+var nodePort = flag.Int("port", 8081, "server port number")
 
 func main() {
 	setupNode()
@@ -48,6 +48,7 @@ func setupNode() {
 
 func runAuction() {
 	for {
+		log.Println("An auction has started!")
 		startNewAuction()
 		time.Sleep(time.Second * 20)
 		endAuction()
