@@ -67,6 +67,7 @@ func startNewAuction() {
 }
 
 func endAuction() {
+	fmt.Printf("Auction is over\nHighest bidder is %s and the bid is %d\n", highestBidder, highestBid)
 	isAuctionOver = true
 }
 

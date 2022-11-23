@@ -20,11 +20,12 @@ type Client struct {
 	id   int
 }
 
-var name = flag.String("clientName", "DefaultName", "client name")
+var name = flag.String("name", "DefaultName", "client name")
 var id = flag.Int("id", 0, "id")
 var frontendPort = flag.Int("frontendPort", 8000, "frontend port")
 
 func main() {
+	flag.Parse()
 	client := &Client{
 		name: *name,
 		id:   *id,

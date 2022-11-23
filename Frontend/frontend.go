@@ -24,6 +24,7 @@ type Frontend struct {
 var frontendPort = flag.Int("serverPort", 8000, "server port number")
 
 func main() {
+	flag.Parse()
 	frontend := &Frontend{
 		serverNodePorts:  make([]int32, 4),
 		serverConnection: getServerConnection(),
