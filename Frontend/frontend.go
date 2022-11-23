@@ -4,11 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	proto "github.com/MadsRoager/AuctionReplication/proto"
 	"google.golang.org/grpc"
@@ -20,7 +21,7 @@ type Frontend struct {
 	serverConnection proto.ServerClient
 }
 
-var frontendPort = flag.Int("serverPort", 8080, "server port number")
+var frontendPort = flag.Int("serverPort", 8000, "server port number")
 
 func main() {
 	frontend := &Frontend{
@@ -66,6 +67,7 @@ func (frontend *Frontend) Result(ctx context.Context, in *proto.Void) (*proto.Bi
 
 func (frontend *Frontend) Bid(ctx context.Context, in *proto.BidRequest) (*proto.Ack, error) {
 	// send UpdateHighestBid to all servernodes
+	fmt.Println("it gets in bid in frontend")
 	return frontend.serverConnection.UpdateHighestBid(ctx, in)
 
 	// when receiving a response, return it and wait for the other serverNodes to reply

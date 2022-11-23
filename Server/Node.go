@@ -3,13 +3,15 @@ package main
 import (
 	context "context"
 	"flag"
-	"github.com/MadsRoager/AuctionReplication/proto"
-	"google.golang.org/grpc"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/MadsRoager/AuctionReplication/proto"
+	"google.golang.org/grpc"
 )
 
 type Node struct {
@@ -69,13 +71,17 @@ func endAuction() {
 }
 
 func (node *Node) UpdateHighestBid(ctx context.Context, bid *proto.BidRequest) (*proto.Ack, error) {
+	fmt.Println("it gets into update highest bid in node")
 	if isAuctionOver {
+		fmt.Println("auction is over")
 		return fail(), nil
 	}
 	if isWinningBet(bid) {
+		fmt.Println("is winning bid")
 		updateHighestBid(bid)
 		return success(), nil
 	}
+	fmt.Println("faillll")
 	return fail(), nil
 }
 

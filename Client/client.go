@@ -65,18 +65,18 @@ func sendMessage(serverConnection proto.FrontendClient) {
 				ProcessID: int32(*id),
 			})
 			if err != nil {
-				log.Println(ans.Ack)
-			} else {
 				log.Fatal("some error occured")
+			} else {
+				log.Println(ans.Ack)
 			}
 
 		}
 		if input == "result" {
 			ans, err := serverConnection.Result(ctx, &proto.Void{})
 			if err != nil {
-				log.Println("Auction status is " + ans.AuctionStatus + ", the highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
-			} else {
 				log.Fatal("some error occured")
+			} else {
+				log.Println("Auction status is " + ans.AuctionStatus + ", the highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
 			}
 		}
 	}
