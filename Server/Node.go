@@ -3,9 +3,9 @@ package main
 import (
 	context "context"
 	"flag"
-	"fmt"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -27,6 +27,12 @@ var mutex = sync.Mutex{}
 var nodePort = flag.Int("port", 8080, "server port number")
 
 func main() {
+	logfile, err := os.OpenFile("../log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	log.SetOutput(logfile)
+	log.SetFlags(2)
 	go setupNode()
 	for {
 		time.Sleep(100 * time.Second)
@@ -42,7 +48,7 @@ func setupNode() {
 		log.Fatalln("could not start listener")
 	}
 	proto.RegisterServerServer(grpcServer, node)
-	log.Println("Server started")
+	log.Println("Server: Server started")
 	serverError := grpcServer.Serve(listener)
 	if serverError != nil {
 		log.Fatalln("could not start server")
@@ -59,7 +65,7 @@ func (node *Node) StartAuction(ctx context.Context, in *proto.Void) (*proto.Ack,
 }
 
 func runAuction() {
-		log.Printf("Node running on port %d says - An auction has started!\n", *nodePort)
+		log.Printf("Server: Node running on port %d says - An auction has started!\n", *nodePort)
 		startNewAuction()
 		time.Sleep(time.Second * 20)
 		endAuction()
@@ -73,7 +79,7 @@ func startNewAuction() {
 }
 
 func endAuction() {
-	fmt.Printf("Node running on port %d says - Auction is over\nHighest bidder is %s and the bid is %d\n", *nodePort, highestBidder, highestBid)
+	log.Printf("Server: Node running on port %d says - Auction is over. Highest bidder is %s and the bid is %d\n", *nodePort, highestBidder, highestBid)
 	isAuctionOver = true
 }
 
@@ -97,7 +103,7 @@ func (node *Node) UpdateHighestBid(ctx context.Context, bid *proto.BidRequest) (
 		updateHighestBid(bid)
 		return success(), nil
 	}
-	return fail("Your bid is not high enough. The current highest bid is " + string(highestBid) + " by " + highestBidder), nil
+	return fail("Your bid is not high enough. The current highest bid is " + strconv.Itoa(int(highestBid)) + " by " + highestBidder), nil
 }
 
 func isWinningBet(bid *proto.BidRequest) bool {
@@ -114,7 +120,7 @@ func updateHighestBid(bid *proto.BidRequest) {
 	mutex.Lock()
 	highestBid = bid.Amount
 	highestBidder = bid.Name
-	log.Printf("Node running on port %d says - The highest bid has been updated and is now %d by %s\n", *nodePort, highestBid, highestBidder)
+	log.Printf("Server: Node running on port %d says - The highest bid has been updated and is now %d by %s\n", *nodePort, highestBid, highestBidder)
 	mutex.Unlock()
 }
 

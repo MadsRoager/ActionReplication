@@ -20,6 +20,12 @@ var id = flag.Int("id", 0, "id")
 var frontendPort = flag.Int("frontendPort", 8000, "frontend port")
 
 func main() {
+	logfile, err := os.OpenFile("../log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	log.SetOutput(logfile)
+	log.SetFlags(2)
 	flag.Parse()
 	go startClient()
 	for {
@@ -54,7 +60,7 @@ func sendMessage(serverConnection proto.FrontendClient) {
 		} else if input == "start" {
 			startAuction(serverConnection, ctx)
 		} else {
-			log.Println("Unknown command: ", input)
+			log.Println("Client: Unknown command: ", input)
 		}
 	}
 }
@@ -69,18 +75,18 @@ func postNewBid(serverConnection proto.FrontendClient, input string, ctx context
 		ProcessID: int32(*id),
 	})
 	if err != nil {
-		log.Fatal("some error occured")
+		log.Fatal("Some error occured")
 	} else {
-		log.Println(ans.Ack)
+		log.Println("Client: " + *name + " got response: " + ans.Ack)
 	}
 }
 
 func logAuctionResult(serverConnection proto.FrontendClient, ctx context.Context) {
 	ans, err := serverConnection.Result(ctx, &proto.Void{})
 	if err != nil {
-		log.Fatal("some error occured")
+		log.Fatal("Some error occured")
 	} else {
-		log.Println(ans.AuctionStatus + " The highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
+		log.Println("Client: " + ans.AuctionStatus + " The highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
 	}
 }
 
@@ -89,6 +95,6 @@ func startAuction(serverConnection proto.FrontendClient, ctx context.Context) {
 	if err != nil {
 		log.Fatal("Some error occured")
 	} else {
-		log.Println(ans.Ack)
+		log.Println("Client: " + *name + " got response: " + ans.Ack)
 	}
 }
