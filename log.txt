@@ -1,40 +1,43 @@
-13:41:05 Server: Server started
-13:41:06 Server: Server started
-13:41:09 Server: Server started
-13:41:11 Frontend: Frontend started
-13:41:11 Frontend: Dialed server 8080
-13:41:11 Frontend: Dialed server 8081
-13:41:11 Frontend: Dialed server 8082
-13:41:18 Server: Node running on port 8080 says - An auction has started!
-13:41:18 Frontend: Success
-13:41:18 Server: Node running on port 8081 says - An auction has started!
-13:41:18 Frontend: Success
-13:41:18 Server: Node running on port 8082 says - An auction has started!
-13:41:18 Frontend: Success
-13:41:18 Client: mads got response: Success
-13:41:20 Frontend: There is already an auction running
-13:41:20 Frontend: There is already an auction running
-13:41:20 Frontend: There is already an auction running
-13:41:20 Client: silke got response: There is already an auction running
-13:41:25 Frontend: Received bid of 4 by silke
-13:41:25 Server: Node running on port 8081 says - The highest bid has been updated and is now 4 by silke
-13:41:25 Frontend: Sends updatehighest bid to node 8081
-13:41:25 Server: Node running on port 8082 says - The highest bid has been updated and is now 4 by silke
-13:41:25 Frontend: Sends updatehighest bid to node 8082
-13:41:25 Client: silke got response: Success
-13:41:27 Frontend: Received bid of 3 by mads
-13:41:27 Frontend: Sends updatehighest bid to node 8081
-13:41:27 Frontend: Sends updatehighest bid to node 8082
-13:41:27 Client: mads got response: Your bid is not high enough. The current highest bid is 4 by silke
-13:41:30 Frontend: Received bid of 5 by mads
-13:41:30 Server: Node running on port 8081 says - The highest bid has been updated and is now 5 by mads
-13:41:30 Frontend: Sends updatehighest bid to node 8081
-13:41:30 Server: Node running on port 8082 says - The highest bid has been updated and is now 5 by mads
-13:41:30 Frontend: Sends updatehighest bid to node 8082
-13:41:30 Client: mads got response: Success
-13:41:34 Frontend: Request result in node 8081
-13:41:34 Client: Auction is ongoing. The highest bid is 5 by mads
-13:41:38 Server: Node running on port 8081 says - Auction is over. Highest bidder is mads and the bid is 5
-13:41:49 Frontend: Received bid of 6 by mads
-13:41:49 Frontend: Sends updatehighest bid to node 8081
-13:41:49 Client: mads got response: Auction is over
+14:13:56 Server: Server started
+14:13:57 Server: Server started
+14:13:58 Server: Server started
+14:14:00 Frontend: Frontend started
+14:14:00 Frontend: Dialed server 8080
+14:14:00 Frontend: Dialed server 8081
+14:14:00 Frontend: Dialed server 8082
+14:14:01 Frontend: Frontend started
+14:14:01 Frontend: Dialed server 8080
+14:14:01 Frontend: Dialed server 8081
+14:14:01 Frontend: Dialed server 8082
+14:14:06 Server: Node running on port 8080 says - An auction has started!
+14:14:06 Frontend: Success
+14:14:06 Server: Node running on port 8081 says - An auction has started!
+14:14:06 Frontend: Success
+14:14:06 Server: Node running on port 8082 says - An auction has started!
+14:14:06 Frontend: Success
+14:14:06 Client: silke got response: Success
+14:14:10 Server: Server node 8080 crashed!!!
+14:14:12 Frontend: There is already an auction running
+14:14:12 Frontend: There is already an auction running
+14:14:12 Client: mads got response: There is already an auction running
+14:14:16 Frontend: Received bid of 3 by mads
+14:14:16 Server: Node running on port 8081 says - The highest bid has been updated and is now 3 by mads
+14:14:16 Frontend: Sends updatehighest bid to node 8081
+14:14:16 Server: Node running on port 8082 says - The highest bid has been updated and is now 3 by mads
+14:14:16 Frontend: Sends updatehighest bid to node 8082
+14:14:16 Client: mads got response: Success
+14:14:21 Frontend: Received bid of 2 by silke
+14:14:21 Frontend: Sends updatehighest bid to node 8081
+14:14:21 Frontend: Sends updatehighest bid to node 8082
+14:14:21 Client: silke got response: Your bid is not high enough. The current highest bid is 3 by mads
+14:14:22 Frontend: Received bid of 5 by silke
+14:14:22 Server: Node running on port 8081 says - The highest bid has been updated and is now 5 by silke
+14:14:22 Frontend: Sends updatehighest bid to node 8081
+14:14:22 Server: Node running on port 8082 says - The highest bid has been updated and is now 5 by silke
+14:14:22 Frontend: Sends updatehighest bid to node 8082
+14:14:22 Client: silke got response: Success
+14:14:26 Server: Node running on port 8081 says - Auction is over. Highest bidder is silke and the bid is 5
+14:14:26 Server: Node running on port 8082 says - Auction is over. Highest bidder is silke and the bid is 5
+14:14:31 Server: Server node 8081 crashed!!!
+14:14:32 Frontend: Request result in node 8082
+14:14:32 Client: Auction has ended. The highest bid is 5 by silke

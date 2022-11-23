@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	context "context"
 	"flag"
 	"log"
@@ -34,8 +35,20 @@ func main() {
 	log.SetOutput(logfile)
 	log.SetFlags(2)
 	go setupNode()
+	go waitForCrash()
 	for {
 		time.Sleep(100 * time.Second)
+	}
+}
+
+func waitForCrash() {
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		input := scanner.Text()
+		if input == "crash" {
+			log.Fatalf("Server: Server node %d crashed!!!", *nodePort)
+		} 
+		
 	}
 }
 

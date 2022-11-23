@@ -12,9 +12,19 @@ In the Client terminal navigate to the Client folder and type:
 In the Frontend terminal, navigate to the Frontend folder, and type:
 - go run .
 
-If there is more than one frontend, then the command is followed by a port. E.g. go run . port [insert unique port here]
+If there is more than one frontend, then the command is followed by a port. E.g. go run . -port [insert unique port here]
 
-And the client is told what frontend to connect to with go run . frontendPort [insert frontend port here]
+And the Client is told what frontend to connect to with
+go run . -frontendPort [insert frontend port here] -name [insert name of client]
+
+In the Client terminal you can write the 3 following commands (case sensitive)
+1. To start an auction: start
+2. To bid: bid [insert any number] e.g. bid 12
+3. To get the result: result
+
+To simulate a crash you can write crash (case sensitive) in one of the Server terminals.
+
+
 ### Commands for renewing proto
 protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/proto.proto
 
