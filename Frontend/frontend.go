@@ -17,8 +17,7 @@ import (
 
 type Frontend struct {
 	proto.UnimplementedFrontendServer
-	serverNodePorts  []int32
-	serverConnection proto.ServerClient
+	serverConnection []proto.ServerClient
 }
 
 var frontendPort = flag.Int("serverPort", 8000, "server port number")
@@ -26,13 +25,12 @@ var frontendPort = flag.Int("serverPort", 8000, "server port number")
 func main() {
 	flag.Parse()
 	frontend := &Frontend{
-		serverNodePorts:  make([]int32, 4),
 		serverConnection: getServerConnection(),
 	}
 	go startFrontEnd(frontend)
-
+	
+	fmt.Println("frontend started")
 	for {
-		fmt.Println("frontend started")
 		time.Sleep(100 * time.Second)
 	}
 }
@@ -50,27 +48,80 @@ func startFrontEnd(frontend *Frontend) {
 	}
 }
 
-func getServerConnection() proto.ServerClient { // Hard coded port 8081
-	conn, err := grpc.Dial(":"+strconv.Itoa(8081), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalln("Could not dial server")
+func getServerConnection() []proto.ServerClient {
+	conns := make([]proto.ServerClient, 3)
+	for i := 0; i < 3; i++ {
+		port := 8080 + i
+		conn, err := grpc.Dial(":"+strconv.Itoa(port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Println("Could not dial server")
+		}
+		log.Printf("dialed server %d\n", port)
+		conns[i] = proto.NewServerClient(conn)
 	}
-	return proto.NewServerClient(conn)
+	return conns
 }
 
 func (frontend *Frontend) Result(ctx context.Context, in *proto.Void) (*proto.BidResult, error) {
 	// send GetHighestBid to all servernodes
-	return frontend.serverConnection.GetHighestBid(ctx, in)
-
+	counter := 0
+	acks := make([]*proto.BidResult, 3)
+	for i := 0; i < 3; i++ {
+		ack, err := frontend.serverConnection[i].GetHighestBid(ctx, in)
+		
+		if err == nil {
+			acks[counter] = ack
+			counter++
+		}
+	}
+	if len(acks) == 0 {
+		return nil, grpc.Errorf(1, "error")
+	}
+	return acks[0], nil
 	// when receiving a response, return it and wait for the other serverNodes to reply
 
 }
 
 func (frontend *Frontend) Bid(ctx context.Context, in *proto.BidRequest) (*proto.Ack, error) {
 	// send UpdateHighestBid to all servernodes
-	fmt.Println("it gets in bid in frontend")
-	return frontend.serverConnection.UpdateHighestBid(ctx, in)
+	counter := 0
+	acks := make([]*proto.Ack, 3)
+	log.Println("it gets in bid in frontend")
+	for i := 0; i < 3; i++ {
+		log.Printf("sends updatehighest bid to node %d\n", i) 
+		conn := frontend.serverConnection[i]
+		ack, err := conn.UpdateHighestBid(ctx, in)
+		
+		if err == nil {
+			acks[counter] = ack
+			counter++
+		}
+	}
+	if len(acks) == 0 {
+		return nil, grpc.Errorf(1, "error")
+	}
+	return acks[0], nil
+	// when receiving a response, return it and wait for the other serverNodes to reply
 
+}
+
+func (frontend *Frontend) StartAuction(ctx context.Context, in *proto.Void) (*proto.Ack, error) {
+	// send UpdateHighestBid to all servernodes
+	counter := 0
+	acks := make([]*proto.Ack, 3)
+	for i := 0; i < 3; i++ {
+		log.Printf("sends  to node %d\n", i) 
+		ack, err := frontend.serverConnection[i].StartAuction(ctx, in)
+		
+		if err == nil {
+			acks[counter] = ack
+			counter++
+		}
+	}
+	if len(acks) == 0 {
+		return nil, grpc.Errorf(1, "error")
+	}
+	return acks[0], nil
 	// when receiving a response, return it and wait for the other serverNodes to reply
 
 }

@@ -16,33 +16,34 @@ import (
 
 type Node struct {
 	proto.UnimplementedServerServer
-	serverNodePorts []int32
 }
 
 var highestBid int32 = 0
 var highestBidder = "No bidder yet"
 var highestBidderID int32 = 0
-var isAuctionOver = false
+var isAuctionOver = true
 
 var mutex = sync.Mutex{}
-var nodePort = flag.Int("port", 8081, "server port number")
+var nodePort = flag.Int("port", 8080, "server port number")
 
 func main() {
 	go setupNode()
-	defer runAuction()
+	for {
+		time.Sleep(100 * time.Second)
+	}
 }
 
 func setupNode() {
 	flag.Parse()
-	node := &Node{
-		serverNodePorts: make([]int32, 4),
-	}
+	node := &Node{}
 	grpcServer := grpc.NewServer()
+	log.Println(*nodePort)
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(*nodePort))
 	if err != nil {
 		log.Fatalln("could not start listener")
 	}
 	proto.RegisterServerServer(grpcServer, node)
+	log.Println("server started")
 	serverError := grpcServer.Serve(listener)
 	if serverError != nil {
 		log.Fatalln("could not start server")
@@ -50,13 +51,12 @@ func setupNode() {
 }
 
 func runAuction() {
-	for {
+
 		log.Println("An auction has started!")
 		startNewAuction()
 		time.Sleep(time.Second * 20)
 		endAuction()
-		time.Sleep(time.Second * 5)
-	}
+
 }
 
 func startNewAuction() {
@@ -128,5 +128,14 @@ func success() *proto.Ack {
 func fail() *proto.Ack {
 	return &proto.Ack{
 		Ack: "Fail",
+	}
+}
+
+func (node *Node) StartAuction(ctx context.Context, in *proto.Void) (*proto.Ack, error) {
+	if isAuctionOver == true {
+		go runAuction()
+		return success(), nil
+	} else {
+		return fail(), nil
 	}
 }

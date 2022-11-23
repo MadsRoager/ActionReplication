@@ -6,11 +6,13 @@ service Frontend
 {
   rpc Bid (BidRequest) returns (Ack);
   rpc Result (Void) returns (BidResult);
+  rpc StartAuction (Void) returns (Ack);
 }
 
 service Server {
   rpc UpdateHighestBid (BidRequest) returns (Ack);
   rpc GetHighestBid (Void) returns (BidResult);
+  rpc StartAuction (Void) returns (Ack);
 }
 
 message Void {}

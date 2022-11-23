@@ -80,5 +80,13 @@ func sendMessage(serverConnection proto.FrontendClient) {
 				log.Println("Auction status is " + ans.AuctionStatus + ", the highest bid is " + strconv.Itoa(int(ans.Amount)) + " by " + ans.Name)
 			}
 		}
+		if input == "start" {
+			ans, err := serverConnection.StartAuction(ctx, &proto.Void{})
+			if err != nil {
+				log.Fatal("some error occured")
+			} else {
+				log.Println("Auction started: " + ans.Ack)
+			}
+		}
 	}
 }
