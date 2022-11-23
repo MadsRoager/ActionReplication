@@ -37,26 +37,32 @@ func setupNode() {
 	flag.Parse()
 	node := &Node{}
 	grpcServer := grpc.NewServer()
-	log.Println(*nodePort)
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(*nodePort))
 	if err != nil {
 		log.Fatalln("could not start listener")
 	}
 	proto.RegisterServerServer(grpcServer, node)
-	log.Println("server started")
+	log.Println("Server started")
 	serverError := grpcServer.Serve(listener)
 	if serverError != nil {
 		log.Fatalln("could not start server")
 	}
 }
 
-func runAuction() {
+func (node *Node) StartAuction(ctx context.Context, in *proto.Void) (*proto.Ack, error) {
+	if isAuctionOver == true {
+		go runAuction()
+		return success(), nil
+	} else {
+		return fail("There is already an auction running"), nil
+	}
+}
 
-		log.Println("An auction has started!")
+func runAuction() {
+		log.Printf("Node running on port %d says - An auction has started!\n", *nodePort)
 		startNewAuction()
 		time.Sleep(time.Second * 20)
 		endAuction()
-
 }
 
 func startNewAuction() {
@@ -67,23 +73,31 @@ func startNewAuction() {
 }
 
 func endAuction() {
-	fmt.Printf("Auction is over\nHighest bidder is %s and the bid is %d\n", highestBidder, highestBid)
+	fmt.Printf("Node running on port %d says - Auction is over\nHighest bidder is %s and the bid is %d\n", *nodePort, highestBidder, highestBid)
 	isAuctionOver = true
 }
 
+func success() *proto.Ack {
+	return &proto.Ack{
+		Ack: "Success",
+	}
+}
+
+func fail(message string) *proto.Ack {
+	return &proto.Ack{
+		Ack: message,
+	}
+}
+
 func (node *Node) UpdateHighestBid(ctx context.Context, bid *proto.BidRequest) (*proto.Ack, error) {
-	fmt.Println("it gets into update highest bid in node")
 	if isAuctionOver {
-		fmt.Println("auction is over")
-		return fail(), nil
+		return fail("Auction is over"), nil
 	}
 	if isWinningBet(bid) {
-		fmt.Println("is winning bid")
 		updateHighestBid(bid)
 		return success(), nil
 	}
-	fmt.Println("faillll")
-	return fail(), nil
+	return fail("Your bid is not high enough. The current highest bid is " + string(highestBid) + " by " + highestBidder), nil
 }
 
 func isWinningBet(bid *proto.BidRequest) bool {
@@ -100,6 +114,7 @@ func updateHighestBid(bid *proto.BidRequest) {
 	mutex.Lock()
 	highestBid = bid.Amount
 	highestBidder = bid.Name
+	log.Printf("Node running on port %d says - The highest bid has been updated and is now %d by %s\n", *nodePort, highestBid, highestBidder)
 	mutex.Unlock()
 }
 
@@ -117,25 +132,4 @@ func getAuctionStatus() string {
 		return "Auction has ended."
 	}
 	return "Auction is ongoing."
-}
-
-func success() *proto.Ack {
-	return &proto.Ack{
-		Ack: "Success",
-	}
-}
-
-func fail() *proto.Ack {
-	return &proto.Ack{
-		Ack: "Fail",
-	}
-}
-
-func (node *Node) StartAuction(ctx context.Context, in *proto.Void) (*proto.Ack, error) {
-	if isAuctionOver == true {
-		go runAuction()
-		return success(), nil
-	} else {
-		return fail(), nil
-	}
 }
